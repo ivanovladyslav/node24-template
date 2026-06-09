@@ -12,7 +12,8 @@ npm run dev    # watch mode
 
 ## Endpoints
 
-- `GET /` — hello + node version
+- `GET /` — landing page (live node version + uptime)
+- `GET /api` — hello + node version (JSON)
 - `GET /health` — health check
 
 ## Docker

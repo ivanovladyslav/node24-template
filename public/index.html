@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>node24-template</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --fg: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 50% -20%, #1b2433, var(--bg) 60%);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--green);
+      background: rgba(63, 185, 80, 0.1);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+    h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    p.lead { color: var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 28px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .stat .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat .v { font-size: 18px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .links { display: flex; gap: 12px; flex-wrap: wrap; }
+    a.btn {
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      color: var(--fg);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    a.btn:hover { border-color: var(--accent); color: var(--accent); }
+    footer { margin-top: 24px; font-size: 12px; color: var(--muted); text-align: center; }
+    code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <span class="badge"><span class="dot"></span> server running</span>
+    <h1>node24-template</h1>
+    <p class="lead">Minimal Node.js 24 + Express starter. Live data below pulled from the <code>/api</code> endpoint.</p>
+
+    <div class="grid">
+      <div class="stat">
+        <div class="k">Node version</div>
+        <div class="v" id="node">…</div>
+      </div>
+      <div class="stat">
+        <div class="k">Uptime</div>
+        <div class="v" id="uptime">…</div>
+      </div>
+    </div>
+
+    <div class="links">
+      <a class="btn" href="/api">/api</a>
+      <a class="btn" href="/health">/health</a>
+      <a class="btn" href="https://github.com/ivanovladyslav/node24-template" target="_blank" rel="noopener">GitHub</a>
+    </div>
+
+    <footer id="time">loading…</footer>
+  </main>
+
+  <script>
+    async function refresh() {
+      try {
+        const [api, health] = await Promise.all([
+          fetch('/api').then((r) => r.json()),
+          fetch('/health').then((r) => r.json()),
+        ]);
+        document.getElementById('node').textContent = api.node;
+        document.getElementById('time').textContent = 'updated ' + new Date(api.time).toLocaleTimeString();
+        const s = Math.floor(health.uptime);
+        document.getElementById('uptime').textContent = s + 's';
+      } catch (e) {
+        document.getElementById('time').textContent = 'failed to reach server';
+      }
+    }
+    refresh();
+    setInterval(refresh, 2000);
+  </script>
+</body>
+</html>

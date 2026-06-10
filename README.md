@@ -1,4 +1,4 @@
-# node24-template
+# node24-test
 
 Simple Node.js 24 + Express template.
 
@@ -19,6 +19,6 @@ npm run dev    # watch mode
 ## Docker
 
 ```bash
-docker build -t node24-template .
-docker run -p 3000:3000 node24-template
+docker build -t node24-test .
+docker run -p 3000:3000 node24-test
 ```

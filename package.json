@@ -1,5 +1,5 @@
 {
-  "name": "node24-test",
+  "name": "node-24-test-mr",
   "version": "1.0.0",
   "description": "Simple Node.js 24 Express template",
   "type": "module",

@@ -155,6 +155,51 @@
     .del-btn:hover { border-color: var(--red); color: var(--red); }
     .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 24px; }
     .err { color: var(--red); font-size: 13px; margin-top: 8px; }
+
+    /* File upload */
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .file-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      flex: 1;
+    }
+    .file-label:hover { border-color: var(--accent); color: var(--accent); }
+    .file-label input[type="file"] { display: none; }
+    .file-preview {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .file-clear {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+    }
+    .file-clear:hover { border-color: var(--red); color: var(--red); }
+    td img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; display: block; }
   </style>
 </head>
 <body>
@@ -186,10 +231,20 @@
   <section class="card">
     <h2>Записи</h2>
 
-    <form class="form-row" id="entry-form">
-      <input id="inp-node" placeholder="Версия ноды" required />
-      <input id="inp-endpoint" placeholder="Эндпойнт" required />
-      <button type="submit" id="add-btn">Добавить</button>
+    <form id="entry-form">
+      <div class="form-row">
+        <input id="inp-node" placeholder="Версия ноды" required />
+        <input id="inp-endpoint" placeholder="Эндпойнт" required />
+        <button type="submit" id="add-btn">Добавить</button>
+      </div>
+      <div class="file-row">
+        <label class="file-label" id="file-label">
+          <input type="file" id="inp-file" accept="image/*" />
+          <span id="file-label-text">📎 Прикрепить изображение (необязательно)</span>
+        </label>
+        <img id="file-preview" class="file-preview" alt="preview" />
+        <button type="button" class="file-clear" id="file-clear">✕</button>
+      </div>
     </form>
     <div class="err" id="form-err"></div>
 
@@ -200,12 +255,13 @@
             <th>#</th>
             <th>Версия ноды</th>
             <th>Эндпойнт</th>
+            <th>Фото</th>
             <th>Создан</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="entries-body">
-          <tr><td colspan="5" class="empty">Загрузка…</td></tr>
+          <tr><td colspan="6" class="empty">Загрузка…</td></tr>
         </tbody>
       </table>
     </div>
@@ -232,7 +288,7 @@
       try {
         const rows = await fetch('/api/entries').then(r => r.json());
         if (!Array.isArray(rows) || rows.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="empty">Нет записей</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">Нет записей</td></tr>';
           return;
         }
         tbody.innerHTML = rows.map(r => `
@@ -240,18 +296,44 @@
             <td>${r.id}</td>
             <td><code>${esc(r.node_version)}</code></td>
             <td><code>${esc(r.endpoint)}</code></td>
+            <td>${r.image_key ? `<img src="/api/image/${esc(r.image_key)}" alt="фото" loading="lazy" />` : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
             <td style="color:var(--muted);font-size:12px">${esc(r.created_at)}</td>
             <td><button class="del-btn" onclick="deleteEntry(${r.id})">Удалить</button></td>
           </tr>
         `).join('');
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
       }
     }
 
     function esc(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
+
+    // File input preview
+    const inpFile = document.getElementById('inp-file');
+    const filePreview = document.getElementById('file-preview');
+    const fileClear = document.getElementById('file-clear');
+    const fileLabelText = document.getElementById('file-label-text');
+
+    inpFile.addEventListener('change', () => {
+      const file = inpFile.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        filePreview.src = url;
+        filePreview.style.display = 'block';
+        fileClear.style.display = 'inline-flex';
+        fileLabelText.textContent = file.name;
+      }
+    });
+
+    fileClear.addEventListener('click', () => {
+      inpFile.value = '';
+      filePreview.src = '';
+      filePreview.style.display = 'none';
+      fileClear.style.display = 'none';
+      fileLabelText.textContent = '📎 Прикрепить изображение (необязательно)';
+    });
 
     document.getElementById('entry-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -260,12 +342,26 @@
       errEl.textContent = '';
       btn.disabled = true;
       try {
+        let image_key = null;
+        const file = inpFile.files[0];
+        if (file) {
+          const fd = new FormData();
+          fd.append('file', file);
+          const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+          if (!upRes.ok) {
+            const d = await upRes.json();
+            throw new Error('Ошибка загрузки: ' + (d.error || upRes.statusText));
+          }
+          image_key = (await upRes.json()).key;
+        }
+
         const res = await fetch('/api/entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             node_version: document.getElementById('inp-node').value,
             endpoint: document.getElementById('inp-endpoint').value,
+            image_key,
           }),
         });
         if (!res.ok) {
@@ -274,6 +370,7 @@
         }
         document.getElementById('inp-node').value = '';
         document.getElementById('inp-endpoint').value = '';
+        fileClear.click();
         await loadEntries();
       } catch (err) {
         errEl.textContent = err.message;

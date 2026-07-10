@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,6 +13,7 @@
       --muted: #8b949e;
       --accent: #58a6ff;
       --green: #3fb950;
+      --red: #f85149;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -21,13 +22,14 @@
       color: var(--fg);
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 24px;
+      gap: 24px;
     }
     .card {
       width: 100%;
-      max-width: 520px;
+      max-width: 680px;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -48,6 +50,7 @@
     }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
     h1 { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
     p.lead { color: var(--muted); font-size: 16px; line-height: 1.6; margin-bottom: 28px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
     .stat {
@@ -75,6 +78,128 @@
     a.btn:hover { border-color: var(--accent); color: var(--accent); }
     footer { margin-top: 24px; font-size: 12px; color: var(--muted); text-align: center; }
     code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+
+    /* Form */
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .form-row input {
+      flex: 1;
+      min-width: 140px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-row input:focus { border-color: var(--accent); }
+    .form-row input::placeholder { color: var(--muted); }
+    .form-row button {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .form-row button:hover { opacity: 0.85; }
+    .form-row button:disabled { opacity: 0.4; cursor: default; }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead { background: var(--bg); }
+    th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .del-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .del-btn:hover { border-color: var(--red); color: var(--red); }
+    .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 24px; }
+    .err { color: var(--red); font-size: 13px; margin-top: 8px; }
+
+    /* File upload */
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .file-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      flex: 1;
+    }
+    .file-label:hover { border-color: var(--accent); color: var(--accent); }
+    .file-label input[type="file"] { display: none; }
+    .file-preview {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .file-clear {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+    }
+    .file-clear:hover { border-color: var(--red); color: var(--red); }
+    td img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; display: block; }
   </style>
 </head>
 <body>
@@ -103,6 +228,45 @@
     <footer id="time">loading…</footer>
   </main>
 
+  <section class="card">
+    <h2>Записи</h2>
+
+    <form id="entry-form">
+      <div class="form-row">
+        <input id="inp-node" placeholder="Версия ноды" required />
+        <input id="inp-endpoint" placeholder="Эндпойнт" required />
+        <button type="submit" id="add-btn">Добавить</button>
+      </div>
+      <div class="file-row">
+        <label class="file-label" id="file-label">
+          <input type="file" id="inp-file" accept="image/*" />
+          <span id="file-label-text">📎 Прикрепить изображение (необязательно)</span>
+        </label>
+        <img id="file-preview" class="file-preview" alt="preview" />
+        <button type="button" class="file-clear" id="file-clear">✕</button>
+      </div>
+    </form>
+    <div class="err" id="form-err"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Версия ноды</th>
+            <th>Эндпойнт</th>
+            <th>Фото</th>
+            <th>Создан</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="entries-body">
+          <tr><td colspan="6" class="empty">Загрузка…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <script>
     async function refresh() {
       try {
@@ -118,8 +282,111 @@
         document.getElementById('time').textContent = 'failed to reach server';
       }
     }
+
+    async function loadEntries() {
+      const tbody = document.getElementById('entries-body');
+      try {
+        const rows = await fetch('/api/entries').then(r => r.json());
+        if (!Array.isArray(rows) || rows.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty">Нет записей</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td>${r.id}</td>
+            <td><code>${esc(r.node_version)}</code></td>
+            <td><code>${esc(r.endpoint)}</code></td>
+            <td>${r.image_key ? `<img src="/api/image/${esc(r.image_key)}" alt="фото" loading="lazy" />` : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
+            <td style="color:var(--muted);font-size:12px">${esc(r.created_at)}</td>
+            <td><button class="del-btn" onclick="deleteEntry(${r.id})">Удалить</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty" style="color:var(--red)">${e.message}</td></tr>`;
+      }
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // File input preview
+    const inpFile = document.getElementById('inp-file');
+    const filePreview = document.getElementById('file-preview');
+    const fileClear = document.getElementById('file-clear');
+    const fileLabelText = document.getElementById('file-label-text');
+
+    inpFile.addEventListener('change', () => {
+      const file = inpFile.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        filePreview.src = url;
+        filePreview.style.display = 'block';
+        fileClear.style.display = 'inline-flex';
+        fileLabelText.textContent = file.name;
+      }
+    });
+
+    fileClear.addEventListener('click', () => {
+      inpFile.value = '';
+      filePreview.src = '';
+      filePreview.style.display = 'none';
+      fileClear.style.display = 'none';
+      fileLabelText.textContent = '📎 Прикрепить изображение (необязательно)';
+    });
+
+    document.getElementById('entry-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('add-btn');
+      const errEl = document.getElementById('form-err');
+      errEl.textContent = '';
+      btn.disabled = true;
+      try {
+        let image_key = null;
+        const file = inpFile.files[0];
+        if (file) {
+          const fd = new FormData();
+          fd.append('file', file);
+          const upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+          if (!upRes.ok) {
+            const d = await upRes.json();
+            throw new Error('Ошибка загрузки: ' + (d.error || upRes.statusText));
+          }
+          image_key = (await upRes.json()).key;
+        }
+
+        const res = await fetch('/api/entries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            node_version: document.getElementById('inp-node').value,
+            endpoint: document.getElementById('inp-endpoint').value,
+            image_key,
+          }),
+        });
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.error || res.statusText);
+        }
+        document.getElementById('inp-node').value = '';
+        document.getElementById('inp-endpoint').value = '';
+        fileClear.click();
+        await loadEntries();
+      } catch (err) {
+        errEl.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function deleteEntry(id) {
+      await fetch('/api/entries/' + id, { method: 'DELETE' });
+      loadEntries();
+    }
+
     refresh();
     setInterval(refresh, 2000);
+    loadEntries();
   </script>
 </body>
 </html>
